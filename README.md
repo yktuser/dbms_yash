@@ -148,6 +148,10 @@ http://localhost:3000
 * Dashboard with charts
 * Responsive UI (Bootstrap/React)
 
+  Er diagram
+  <img width="826" height="496" alt="1000130825" src="https://github.com/user-attachments/assets/077ddcd4-2c5d-42b0-be67-82037bdc3904" />
+
+
 
 
 
