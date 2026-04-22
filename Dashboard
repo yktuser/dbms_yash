@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Dashboard</h1>
+
+<h2>Add Employee</h2>
+<input id="name" placeholder="Name">
+<input id="dept" placeholder="Department">
+<input id="email" placeholder="Email">
+<input id="salary" placeholder="Salary">
+<button onclick="addEmployee()">Add</button>
+
+<h2>Employee List</h2>
+<button onclick="loadEmployees()">Load</button>
+<ul id="list"></ul>
+
+<script src="script.js"></script>
+
+</body>
+</html>
