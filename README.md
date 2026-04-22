@@ -150,16 +150,4 @@ http://localhost:3000
 
 
 
-## Learning Outcomes
 
-* Understanding relational database design
-* Implementing CRUD operations
-* Working with REST APIs
-* Integrating frontend with backend
-* Applying normalization and foreign keys
-
-
-
-
-
-This project is for academic purposes only.
