@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PayrollPro — Employee Management System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- Sidebar -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">₹</div>
+    <div>
+      <div class="brand-name">PayrollPro</div>
+      <div class="brand-sub">Management System</div>
+    </div>
+  </div>
+
+  <ul class="nav-list">
+    <li class="nav-item active" data-page="dashboard" onclick="navigate('dashboard')">
+      <span class="nav-icon">◈</span> Dashboard
+    </li>
+    <li class="nav-item" data-page="employees" onclick="navigate('employees')">
+      <span class="nav-icon">◉</span> Employees
+    </li>
+    <li class="nav-item" data-page="leaves" onclick="navigate('leaves')">
+      <span class="nav-icon">◑</span> Leave Management
+    </li>
+    <li class="nav-item" data-page="payroll" onclick="navigate('payroll')">
+      <span class="nav-icon">◎</span> Payroll
+    </li>
+  </ul>
+
+  <div class="sidebar-footer">
+    <div class="status-dot"></div>
+    <span>System Online</span>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<main class="main-content">
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <div class="page-title" id="pageTitle">Dashboard</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-date" id="currentDate"></div>
+      <div class="admin-badge">Admin</div>
+    </div>
+  </header>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ===== DASHBOARD PAGE ===== -->
+  <section id="page-dashboard" class="page active">
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card" style="--accent:#6ee7b7">
+        <div class="stat-label">Total Employees</div>
+        <div class="stat-value" id="stat-total">—</div>
+        <div class="stat-sub">Registered</div>
+      </div>
+      <div class="stat-card" style="--accent:#93c5fd">
+        <div class="stat-label">Active</div>
+        <div class="stat-value" id="stat-active">—</div>
+        <div class="stat-sub">Currently working</div>
+      </div>
+      <div class="stat-card" style="--accent:#fcd34d">
+        <div class="stat-label">Pending Leaves</div>
+        <div class="stat-value" id="stat-pending">—</div>
+        <div class="stat-sub">Awaiting approval</div>
+      </div>
+      <div class="stat-card" style="--accent:#f9a8d4">
+        <div class="stat-label">Avg Net Salary</div>
+        <div class="stat-value" id="stat-avg">—</div>
+        <div class="stat-sub">Per employee</div>
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="card">
+        <div class="card-header">
+          <h3>Recent Employees</h3>
+          <button class="btn-sm" onclick="navigate('employees')">View All →</button>
+        </div>
+        <div id="recentEmployees">Loading...</div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h3>Leave Requests</h3>
+          <button class="btn-sm" onclick="navigate('leaves')">View All →</button>
+        </div>
+        <div id="recentLeaves">Loading...</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== EMPLOYEES PAGE ===== -->
+  <section id="page-employees" class="page">
+    <div class="page-actions">
+      <div class="search-wrap">
+        <input type="text" id="empSearch" placeholder="Search employees…" oninput="filterEmployees()" />
+      </div>
+      <button class="btn-primary" onclick="openModal('addEmployee')">+ Add Employee</button>
+    </div>
+
+    <div class="card">
+      <div id="employeeTableWrap">Loading employees...</div>
+    </div>
+  </section>
+
+  <!-- ===== LEAVES PAGE ===== -->
+  <section id="page-leaves" class="page">
+    <div class="page-actions">
+      <div class="leave-stats-bar" id="leaveStatsBar"></div>
+      <button class="btn-primary" onclick="openModal('applyLeave')">+ Apply Leave</button>
+    </div>
+    <div class="card">
+      <div id="leaveTableWrap">Loading leave records...</div>
+    </div>
+  </section>
+
+  <!-- ===== PAYROLL PAGE ===== -->
+  <section id="page-payroll" class="page">
+    <div class="page-actions">
+      <div class="payroll-controls">
+        <input type="month" id="payrollMonth" />
+        <button class="btn-accent" onclick="generateAllPayroll()">⚡ Generate All Payroll</button>
+        <button class="btn-sm" onclick="loadPayroll()">↻ Refresh</button>
+      </div>
+    </div>
+
+    <div class="payroll-summary" id="payrollSummary"></div>
+
+    <div class="card">
+      <div id="payrollTableWrap">Loading payroll records...</div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===== MODALS ===== -->
+
+<!-- Add Employee Modal -->
+<div class="modal-overlay" id="modal-addEmployee" onclick="closeModal('addEmployee')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Add New Employee</h3>
+      <button class="modal-close" onclick="closeModal('addEmployee')">✕</button>
+    </div>
+    <form id="addEmployeeForm" onsubmit="submitAddEmployee(event)">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input type="text" name="name" required placeholder="Arjun Sharma"/>
+        </div>
+        <div class="form-group">
+          <label>Email *</label>
+          <input type="email" name="email" required placeholder="arjun@company.com"/>
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="text" name="phone" placeholder="9876543210"/>
+        </div>
+        <div class="form-group">
+          <label>Department *</label>
+          <select name="department" required>
+            <option value="">Select department</option>
+            <option>Engineering</option>
+            <option>HR</option>
+            <option>Finance</option>
+            <option>Sales</option>
+            <option>Marketing</option>
+            <option>Operations</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Designation *</label>
+          <input type="text" name="designation" required placeholder="Senior Developer"/>
+        </div>
+        <div class="form-group">
+          <label>Basic Salary (₹) *</label>
+          <input type="number" name="basic_salary" required placeholder="50000" min="1"/>
+        </div>
+        <div class="form-group">
+          <label>Date of Joining *</label>
+          <input type="date" name="date_of_joining" required/>
+        </div>
+      </div>
+      <div class="salary-preview" id="salaryPreview" style="display:none"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" onclick="closeModal('addEmployee')">Cancel</button>
+        <button type="submit" class="btn-primary">Add Employee</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Employee Modal -->
+<div class="modal-overlay" id="modal-editEmployee" onclick="closeModal('editEmployee')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Edit Employee</h3>
+      <button class="modal-close" onclick="closeModal('editEmployee')">✕</button>
+    </div>
+    <form id="editEmployeeForm" onsubmit="submitEditEmployee(event)">
+      <input type="hidden" name="emp_id"/>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input type="text" name="name" required/>
+        </div>
+        <div class="form-group">
+          <label>Email *</label>
+          <input type="email" name="email" required/>
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="text" name="phone"/>
+        </div>
+        <div class="form-group">
+          <label>Department *</label>
+          <select name="department" required>
+            <option>Engineering</option><option>HR</option><option>Finance</option>
+            <option>Sales</option><option>Marketing</option><option>Operations</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Designation *</label>
+          <input type="text" name="designation" required/>
+        </div>
+        <div class="form-group">
+          <label>Basic Salary (₹) *</label>
+          <input type="number" name="basic_salary" required min="1"/>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select name="status">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" onclick="closeModal('editEmployee')">Cancel</button>
+        <button type="submit" class="btn-primary">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Apply Leave Modal -->
+<div class="modal-overlay" id="modal-applyLeave" onclick="closeModal('applyLeave')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Apply for Leave</h3>
+      <button class="modal-close" onclick="closeModal('applyLeave')">✕</button>
+    </div>
+    <form id="applyLeaveForm" onsubmit="submitApplyLeave(event)">
+      <div class="form-grid">
+        <div class="form-group" style="grid-column:1/-1">
+          <label>Employee *</label>
+          <select name="emp_id" required id="leaveEmpSelect">
+            <option value="">Select employee</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Leave Type *</label>
+          <select name="leave_type" required>
+            <option value="">Select type</option>
+            <option value="sick">Sick Leave</option>
+            <option value="casual">Casual Leave</option>
+            <option value="earned">Earned Leave</option>
+            <option value="maternity">Maternity Leave</option>
+            <option value="paternity">Paternity Leave</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Start Date *</label>
+          <input type="date" name="start_date" required/>
+        </div>
+        <div class="form-group">
+          <label>End Date *</label>
+          <input type="date" name="end_date" required/>
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label>Reason</label>
+          <textarea name="reason" rows="3" placeholder="Brief reason for leave…"></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" onclick="closeModal('applyLeave')">Cancel</button>
+        <button type="submit" class="btn-primary">Apply Leave</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Generate Payroll Modal -->
+<div class="modal-overlay" id="modal-genPayroll" onclick="closeModal('genPayroll')">
+  <div class="modal modal-sm" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Generate Payroll</h3>
+      <button class="modal-close" onclick="closeModal('genPayroll')">✕</button>
+    </div>
+    <form id="genPayrollForm" onsubmit="submitGenPayroll(event)">
+      <input type="hidden" name="emp_id"/>
+      <div class="form-group">
+        <label>Employee</label>
+        <input type="text" name="emp_name" readonly style="background:var(--bg-2)"/>
+      </div>
+      <div class="form-group">
+        <label>Month *</label>
+        <input type="month" name="month" required/>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" onclick="closeModal('genPayroll')">Cancel</button>
+        <button type="submit" class="btn-accent">Generate Payroll</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Payroll Slip Modal -->
+<div class="modal-overlay" id="modal-payslip" onclick="closeModal('payslip')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Salary Slip</h3>
+      <button class="modal-close" onclick="closeModal('payslip')">✕</button>
+    </div>
+    <div id="payslipContent"></div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
